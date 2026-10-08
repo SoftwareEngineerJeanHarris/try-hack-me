@@ -1,135 +1,198 @@
-Penetration Testing Report
 
-Target: LabBox-01
-IP Address: 10.10.10.45
-Date: October 8, 2026
-Tester: [Your Name]
-Environment: Hypothetical authorized training lab
+# Penetration Testing Report
+### LabBox-01 | Security Assessment
 
-1. Executive Summary
+---
 
-A penetration test was conducted against LabBox-01 to identify vulnerabilities that could allow unauthorized access.
+**Assessment Information**
 
-Two security vulnerabilities were identified, resulting in successful initial access and privilege escalation to root.
+| Field | Details |
+|---|---|
+| Target | LabBox-01 |
+| IP Address | 10.10.10.45 |
+| Platform | TryHackMe (Hypothetical) |
+| Difficulty | Easy |
+| Assessment Date | 2026-10-08 |
+| Tester | Jean Harris |
+| Overall Risk | **HIGH** |
 
-Overall Risk: High
+---
 
-2. Scope & Methodology
+## 1. Executive Summary
 
-Target: 10.10.10.45
-Testing Type: Black-box
-Tools Used: Nmap, Gobuster, Curl, SSH
+A penetration test was conducted against **LabBox-01** to identify vulnerabilities that could allow unauthorized system access.
 
-Testing consisted of:
+### 1.1 Assessment Results
 
-Network reconnaissance
+**Overall Risk: HIGH**
 
-Service enumeration
+The assessment identified two vulnerabilities:
 
-Web directory enumeration
+- **F-01:** Publicly Accessible Backup Files
+- **F-02:** Misconfigured Sudo Permissions
 
-Credential exposure testing
+Together, these vulnerabilities allowed initial access through SSH and subsequent privilege escalation to root.
 
-Privilege escalation assessment
+### 1.2 Business Impact
 
-3. Findings Summary
+Successful exploitation could result in:
 
-ID
+- Unauthorized system access
+- Exposure of sensitive information
+- Full administrative control
 
-Vulnerability
+---
 
-Severity
+## 2. Scope & Methodology
 
-F-01
+### 2.1 Assessment Scope
 
-Publicly Accessible Backup Containing Credentials
+| Component | Details |
+|---|---|
+| Target IP | `10.10.10.45` |
+| Operating System | Linux |
+| Assessment Type | Black-box |
+| Authorization | Training lab |
 
-High
+### 2.2 Tools Used
 
-F-02
+- Nmap — Port scanning
+- Gobuster — Directory enumeration
+- Curl — HTTP requests
+- SSH — Remote authentication
 
-Unsafe Sudo Configuration
+### 2.3 Testing Phases
 
-High
+1. Reconnaissance
+2. Enumeration
+3. Vulnerability Identification
+4. Initial Access
+5. Privilege Escalation
+6. Reporting
 
-4. Detailed Findings
+---
 
-F-01: Exposed Backup Files
+## 3. Vulnerability Summary
 
-Severity: High
-Affected Service: HTTP (Port 80)
+| ID | Finding | Severity | Status |
+|---|---|---|---|
+| F-01 | Exposed Backup Files | High | Confirmed |
+| F-02 | Unsafe Sudo Permissions | High | Confirmed |
 
-Description:
+---
 
-An accessible /backup/ directory contained an archive exposing valid system user credentials.
+## 4. Detailed Findings
 
-Evidence:
+### F-01: Publicly Accessible Backup Files
 
-Directory discovered through Gobuster.
+**Severity:** HIGH  
+**Affected Service:** HTTP (TCP/80)  
+**Affected Path:** `/backup/`
 
-Backup archive downloaded without authentication.
+#### Description
 
-Credentials extracted from archive.
+A publicly accessible backup directory contained an archive with valid system credentials.
 
-Credentials successfully used to establish SSH access.
+#### Technical Evidence
 
-Impact:
+Directory enumeration identified:
 
-An attacker could gain unauthorized access to the operating system using exposed credentials.
+~~~text
+/backup     (Status: 301)
+/admin      (Status: 403)
+~~~
 
-Recommendation:
+The backup archive contained:
 
-Remove backup files from publicly accessible directories.
+~~~text
+Username: operator
+Password: [REDACTED]
+~~~
 
-Rotate exposed credentials.
+#### Impact
 
-Restrict access to sensitive resources.
+An unauthenticated attacker could retrieve credentials and potentially gain system access.
 
-Implement automated checks for exposed files.
+#### Remediation
 
-F-02: Misconfigured Sudo Permissions
+1. Remove sensitive backups from web-accessible directories.
+2. Rotate compromised credentials.
+3. Restrict access to backup storage.
+4. Implement automated exposure scanning.
 
-Severity: High
-Affected Component: Linux privilege configuration
+---
 
-Description:
+### F-02: Misconfigured Sudo Permissions
 
-The compromised user account was permitted to execute /usr/bin/find using sudo without authentication.
+**Severity:** HIGH  
+**Affected Component:** Linux Sudo Configuration
 
-Evidence:
+#### Description
 
-The sudo -l command revealed:
+The `operator` account could execute `/usr/bin/find` with root privileges without a password.
 
+#### Technical Evidence
+
+Command:
+
+~~~bash
+sudo -l
+~~~
+
+Output:
+
+~~~text
 (root) NOPASSWD: /usr/bin/find
+~~~
 
-This configuration was successfully leveraged to execute commands with root privileges.
+This permission was successfully leveraged to execute a privileged shell.
 
-Impact:
+#### Impact
 
-An attacker with access to the affected user account could obtain complete administrative control of the system.
+An attacker with access to the affected account could gain complete administrative control.
 
-Recommendation:
+#### Remediation
 
-Remove unnecessary sudo permissions.
+1. Remove unnecessary sudo permissions.
+2. Implement least-privilege access.
+3. Audit `/etc/sudoers` configurations.
+4. Restrict privileged command execution.
 
-Follow the principle of least privilege.
+---
 
-Review sudoers configurations.
+## 5. Conclusion
 
-Restrict execution of utilities capable of launching arbitrary commands.
+The assessment demonstrated a successful attack chain resulting in full system compromise.
 
-5. Conclusion
+### 5.1 Recommended Actions
 
-Testing successfully demonstrated a chain of vulnerabilities allowing complete system compromise.
+| Priority | Action |
+|---|---|
+| High | Remove publicly exposed backups |
+| High | Rotate compromised credentials |
+| High | Correct sudo permissions |
+| Medium | Review system access controls |
 
-The initial vulnerability exposed SSH credentials, while the second vulnerability allowed escalation from a standard user to root.
+### 5.2 Retesting
 
-Remediation Priority:
+**Status:** Not Performed
 
-Remove exposed backup archives and rotate credentials.
+---
 
-Correct unsafe sudo permissions.
+## 6. Appendix
 
-Retesting Status: Not performed.
+### 6.1 Supporting Evidence
 
-Disclaimer: Fictional demonstration report created for portfolio and educational purposes.
+- Nmap scan results
+- Directory enumeration results
+- SSH authentication evidence
+- Privilege escalation evidence
+
+### 6.2 References
+
+- [OWASP](https://owasp.org/)
+- [MITRE ATT&CK](https://attack.mitre.org/)
+
+---
+
+**Disclaimer:** Hypothetical authorized training environment.
