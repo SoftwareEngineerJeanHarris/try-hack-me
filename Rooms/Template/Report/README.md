@@ -1,6 +1,6 @@
 
 # Penetration Testing Report
-### LabBox-01 | Security Assessment
+### LabBox-01
 
 ---
 
@@ -10,8 +10,6 @@
 |---|---|
 | Target | LabBox-01 |
 | IP Address | 10.10.10.45 |
-| Platform | TryHackMe (Hypothetical) |
-| Difficulty | Easy |
 | Assessment Date | 2026-10-08 |
 | Tester | Jean Harris |
 | Overall Risk | **HIGH** |
@@ -164,7 +162,7 @@ An attacker with access to the affected account could gain complete administrati
 
 The assessment demonstrated a successful attack chain resulting in full system compromise.
 
-### 5.1 Recommended Actions
+### Recommended Actions
 
 | Priority | Action |
 |---|---|
@@ -173,25 +171,14 @@ The assessment demonstrated a successful attack chain resulting in full system c
 | High | Correct sudo permissions |
 | Medium | Review system access controls |
 
-### 5.2 Retesting
-
-**Status:** Not Performed
-
 ---
 
-## 6. Appendix
-
-### 6.1 Supporting Evidence
+## Supporting Evidence
 
 - Nmap scan results
 - Directory enumeration results
 - SSH authentication evidence
 - Privilege escalation evidence
-
-### 6.2 References
-
-- [OWASP](https://owasp.org/)
-- [MITRE ATT&CK](https://attack.mitre.org/)
 
 ---
 
