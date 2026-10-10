@@ -1,7 +1,7 @@
 
-# LabBox-01 — Walkthrough
+# TakeOver — Walkthrough
 
-**Platform:** TryHackMe
+**Platform:** TryHackMe  
 **Difficulty:** Easy  
 **OS:** Linux  
 **Status:** Root Compromised
@@ -9,7 +9,7 @@
 
 ## Overview
 
-This walkthrough documents the methodology used to scan, enumerate, exploit, and a hidden flag in TakeOver.
+This walkthrough documents the methodology used to scan, enumerate our way to finding a hidden subdomain and find a hidden flag in TakeOver.
 
 ### Skills Practiced
 
@@ -85,6 +85,8 @@ css                  (Status: 301) [Size: 316] [--> https://futurevera.thm/css/]
 js                   (Status: 301) [Size: 315] [--> https://futurevera.thm/js/]
 ~~~
 
+Unfortunately there is nothing sensitive found here.
+
 ### 2.2 Subdomain Enumeration
 
 **Command:**
@@ -100,6 +102,18 @@ blog.futurevera.thm Status: 421 [Size: 408]
 support.futurevera.thm Status: 421 [Size: 411]
 ~~~
 
+We furthermore add the found support and blog page to the list of domains to enumerate further
+
+**etc/hosts:**
+
+~~~bash
+# THM > TakeOver
+10.67.136.60 futurevera.thm
+10.67.136.60 *.futurevera.thm
+10.67.136.60 blog.futurevera.thm
+10.67.136.60 support.futurevera.thm
+~~~
+
 ### 2.3 Interesting Findings
 
 The `support.futurevera.thm` subdomain had a bad certificate revealing "DNS Name: secrethelpdesk934752.support.futurevera.thm".
@@ -110,9 +124,14 @@ The `support.futurevera.thm` subdomain had a bad certificate revealing "DNS Name
 # THM > TakeOver
 10.67.136.60 futurevera.thm
 10.67.136.60 *.futurevera.thm
+10.67.136.60 blog.futurevera.thm
 10.67.136.60 support.futurevera.thm
 10.67.136.60 secrethelpdesk934752.support.futurevera.thm
 ~~~
+
+### 2.3 Flag
+
+After finding the final subdomain, upon accessing it, we are derirected to the new secrete domain
 
 ## 3. Attack Chain
 
