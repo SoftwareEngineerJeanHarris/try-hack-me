@@ -1,11 +1,8 @@
-
 # TakeOver — Walkthrough
 
 **Platform:** TryHackMe  
 **Difficulty:** Easy  
 **OS:** Linux  
-**Status:** Root Compromised
-
 
 ## Overview
 
@@ -17,7 +14,6 @@ This walkthrough documents the methodology used to scan, enumerate our way to fi
 - Service enumeration
 - Web directory discovery
 - Web subdomain discovery
-
 
 ## 0. Reconnaissance
 
@@ -65,7 +61,6 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 | 22 | SSH | Identify credentials |
 | 80 | HTTP | Enumerate directories |
 | 80 | HTTPS | Enumerate directories |
-
 
 ## 2. Enumeration
 
